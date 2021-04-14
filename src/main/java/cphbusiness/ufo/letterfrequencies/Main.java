@@ -1,15 +1,13 @@
 package cphbusiness.ufo.letterfrequencies;
 
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.Reader;
+import java.io.*;
 import java.sql.Time;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+
 import static java.util.stream.Collectors.toMap;
 
 /**
@@ -21,17 +19,44 @@ import static java.util.stream.Collectors.toMap;
 public class Main {
 
     public static void main(String[] args) throws FileNotFoundException, IOException {
-        System.out.println(LocalDateTime.now());
+
         String fileName = "C:\\Users\\madsm\\OneDrive\\Dokumenter\\CPHBusinessGit\\UFOAssignment3\\letterfrequencies-master\\src\\main\\resources\\FoundationSeries.txt";
-        Reader reader = new FileReader(fileName);
-        Map<Integer, Long> freq = new HashMap<>();
-        tallyChars(reader, freq);
-        print_tally(freq);
-        System.out.println(LocalDateTime.now());
+
+
+        try (Stopwatch sw = new Stopwatch()) {
+            Map<Integer, Long> freq = new HashMap<>();
+            var pre = sw.step();
+            Reader reader = new FileReader(fileName);
+            var post = sw.step() - pre;
+            tallyChars(reader, freq);
+            var postTally = sw.step() - post;
+            System.out.println("TIME FOR FileReader: " + postTally);
+        }
+        try (Stopwatch sw = new Stopwatch()) {
+            Map<Integer, Long> freq = new HashMap<>();
+            var pre = sw.step();
+            Reader reader = new FileReader(fileName);
+            BufferedReader br = new BufferedReader(reader);
+            var post = sw.step() - pre;
+            tallyChars3(br, freq);
+            var postTally = sw.step() - post;
+            System.out.println("TIME FOR BufferedReader: " + postTally);
+        }
+
 
     }
 
     private static void tallyChars(Reader reader, Map<Integer, Long> freq) throws IOException {
+        int b;
+        while ((b = reader.read()) != -1) {
+            try {
+                freq.put(b, freq.get(b) + 1);
+            } catch (NullPointerException np) {
+                freq.put(b, 1L);
+            };
+        }
+    }
+    private static void tallyChars2(BufferedReader reader, Map<Integer, Long> freq) throws IOException {
         int b;
         while ((b = reader.read()) != -1) {
             try {
@@ -56,14 +81,16 @@ public class Main {
                         toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e2,
                                 LinkedHashMap::new));
         for (Character c : sorted.keySet()) {
-            System.out.println("" + c + ": " + sorted.get(c));;
+            System.out.println("" + c + ": " + sorted.get(c));
+            ;
         }
     }
-    private static void tallyChars2(Reader reader, Map<Integer, Long> freq) throws IOException {
+
+    private static void tallyChars3(BufferedReader reader, Map<Integer, Long> freq) throws IOException {
         int b;
         while ((b = reader.read()) != -1) {
-           freq.putIfAbsent(b, 0L);
-           freq.put(b, freq.get(b) + 1);
+            freq.putIfAbsent(b, 0L);
+            freq.put(b, freq.get(b) + 1);
         }
     }
 }

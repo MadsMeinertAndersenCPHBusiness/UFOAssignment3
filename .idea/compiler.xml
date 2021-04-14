@@ -10,7 +10,7 @@
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="letterfrequencies" target="1.8" />
+      <module name="letterfrequencies" target="10" />
     </bytecodeTargetLevel>
   </component>
 </project>
